@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Movie from "../models/Movie";
+import Mood from "../Models/Mood";
+import Movie from "../Models/Movie";
 import { mapGenresToMoodIds } from "../utils/genreToMoodMapper";
-import Mood from "../models/Mood";
- 
+
 export const saveMovie = async (req: Request, res: Response) => {
   try {
     const {
@@ -83,4 +83,3 @@ export const getMovieById = async (req: Request, res: Response) => {
     res.status(500).json({ message: (err as Error).message });
   }
 };
-

@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMovieById = exports.getMoviesByMood = exports.saveMovie = void 0;
-const Movie_1 = __importDefault(require("../models/Movie"));
+const Mood_1 = __importDefault(require("../Models/Mood"));
+const Movie_1 = __importDefault(require("../Models/Movie"));
 const genreToMoodMapper_1 = require("../utils/genreToMoodMapper");
-const Mood_1 = __importDefault(require("../models/Mood"));
 const saveMovie = async (req, res) => {
     try {
         const { movieId, title, originalTitle, overview, posterPath, backdropPath, releaseDate, runtime, popularity, voteAverage, voteCount, trailerKey, genres, } = req.body;

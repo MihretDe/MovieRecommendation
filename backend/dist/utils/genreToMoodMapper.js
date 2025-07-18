@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapGenresToMoodIds = void 0;
-const Mood_1 = __importDefault(require("../models/Mood"));
+const Mood_1 = __importDefault(require("../Models/Mood"));
 // genre ID → mood name
 const genreToMood = {
     28: "excited", // Action

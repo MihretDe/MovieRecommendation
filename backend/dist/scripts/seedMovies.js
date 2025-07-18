@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
-const node_fetch_1 = __importDefault(require("node-fetch"));
-const Movie_1 = __importDefault(require("../models/Movie"));
-const genreToMoodMapper_1 = require("../utils/genreToMoodMapper");
 const mongoose_1 = __importDefault(require("mongoose"));
+const node_fetch_1 = __importDefault(require("node-fetch"));
+const Movie_1 = __importDefault(require("../Models/Movie"));
+const genreToMoodMapper_1 = require("../utils/genreToMoodMapper");
 dotenv_1.default.config();
 const API_TOKEN = process.env.TMDB_TOKEN;
 const API_URL = "https://api.themoviedb.org/3/movie/popular?page=1";
@@ -22,9 +22,9 @@ const seedMovies = async () => {
         for (let page = 1; page <= 10; page++) {
             const response = await (0, node_fetch_1.default)(`https://api.themoviedb.org/3/movie/popular?page=${page}`, {
                 headers: {
-                    accept: 'application/json',
-                    Authorization: `Bearer ${API_TOKEN}`
-                }
+                    accept: "application/json",
+                    Authorization: `Bearer ${API_TOKEN}`,
+                },
             });
             const data = (await response.json());
             const movies = data.results;
@@ -56,7 +56,6 @@ const seedMovies = async () => {
             console.log("🎉 Movie seeding complete!");
             process.exit(0);
         }
-        ;
     }
     catch (err) {
         console.error("❌ Error:", err);
