@@ -3,10 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMoviesByMood = exports.saveMovie = void 0;
-const Movie_1 = __importDefault(require("../Models/Movie"));
+exports.getMovieById = exports.getMoviesByMood = exports.saveMovie = void 0;
+const Movie_1 = __importDefault(require("../models/Movie"));
 const genreToMoodMapper_1 = require("../utils/genreToMoodMapper");
-const Mood_1 = __importDefault(require("../Models/Mood"));
+const Mood_1 = __importDefault(require("../models/Mood"));
 const saveMovie = async (req, res) => {
     try {
         const { movieId, title, originalTitle, overview, posterPath, backdropPath, releaseDate, runtime, popularity, voteAverage, voteCount, trailerKey, genres, } = req.body;
@@ -58,3 +58,16 @@ const getMoviesByMood = async (req, res) => {
     }
 };
 exports.getMoviesByMood = getMoviesByMood;
+const getMovieById = async (req, res) => {
+    try {
+        const movieId = req.params.id;
+        const movie = await Movie_1.default.findOne({ movieId }).populate("genres moods");
+        if (!movie)
+            return res.status(404).json({ message: "Movie not found" });
+        res.json(movie);
+    }
+    catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+exports.getMovieById = getMovieById;
