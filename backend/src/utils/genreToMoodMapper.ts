@@ -1,4 +1,4 @@
-import Mood from '../models/Mood';
+import Mood from '../Models/Mood';
 
 // Example mapping: TMDb Genre IDs → Mood Names
 const genreMoodMap: Record<number, string> = {

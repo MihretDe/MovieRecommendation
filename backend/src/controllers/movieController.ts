@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Movie from "../models/Movie";
+import Movie from "../Models/Movie";
 import { mapGenresToMoodIds } from "../utils/genreToMoodMapper";
-import Mood from "../models/Mood";
+import Mood from "../Models/Mood";
 
 export const saveMovie = async (req: Request, res: Response) => {
   try {

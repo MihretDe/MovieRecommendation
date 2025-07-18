@@ -11,5 +11,7 @@ app.use(express.json());
 // Routes
 import movieRoutes from "./routes/movies";
 app.use("/api/movies", movieRoutes);
+import authRoutes from "./routes/auth";
+app.use("/api/auth", authRoutes);
 
 export default app;
