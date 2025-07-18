@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { getMoviesByMood } from "../controllers/movieController";
+import { getMovieById, getMoviesByMood, saveMovie } from "../controllers/movieController";
 
 const router = Router();
-
+router.post("/", saveMovie);
 router.get("/", getMoviesByMood);
+router.get("/:id", getMovieById);
 
 export default router;

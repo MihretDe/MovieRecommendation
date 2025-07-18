@@ -2,14 +2,17 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+// Routes
+import movieRoutes from "./routes/movies";
+import moodRoutes from "./routes/moods";
+
 dotenv.config();
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Routes
-import movieRoutes from "./routes/movies";
 app.use("/api/movies", movieRoutes);
+app.use("/api/moods", moodRoutes);
 
 export default app;
