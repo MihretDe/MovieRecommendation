@@ -10,7 +10,9 @@ interface Auth0TokenResponse {
 }
 
 export async function getManagementToken(): Promise<string> {
+
   try {
+    console.log("Fetching Auth0 management token...");
     const response: AxiosResponse<Auth0TokenResponse> = await axios.post(
       `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
       {
