@@ -13,7 +13,7 @@ export interface IMovie extends Document {
   voteAverage: number;
   voteCount: number;
   trailerKey: string;
-  genres: mongoose.Types.ObjectId[];
+  genres: [Number];
   moods: mongoose.Types.ObjectId[];
 }
 
@@ -30,7 +30,7 @@ const MovieSchema: Schema = new Schema({
   voteAverage: Number,
   voteCount: Number,
   trailerKey: String,
-  genres: [{ type: Schema.Types.ObjectId, ref: "Genre" }],
+  genres: [{ type: Number }],
   moods: [{ type: Schema.Types.ObjectId, ref: "Mood" }], // ✅ New field
 });
 

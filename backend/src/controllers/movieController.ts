@@ -72,3 +72,15 @@ export const getMoviesByMood = async (req: Request, res: Response) => {
     res.status(500).json({ message: (err as Error).message });
   }
 };
+
+export const getMovieById = async (req: Request, res: Response) => {
+  try {
+    const movieId = req.params.id;
+    const movie = await Movie.findOne({ movieId }).populate("genres moods");
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    res.json(movie);
+  } catch (err) {
+    res.status(500).json({ message: (err as Error).message });
+  }
+};
+
