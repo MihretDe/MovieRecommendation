@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getMovieById, getMoviesByMood, saveMovie } from "../controllers/movieController";
+import { getMovieById, getMoviesByMood, saveMovie } from "../Controllers/movieController";
 
 const router = Router();
 router.post("/", saveMovie);

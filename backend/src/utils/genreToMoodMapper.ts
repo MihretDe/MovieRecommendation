@@ -1,4 +1,4 @@
-import Mood from "../models/Mood";
+import Mood from "../Models/Mood";
 // genre ID → mood name
 const genreToMood: Record<number, string> = {
   28: "excited", // Action

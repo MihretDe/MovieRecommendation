@@ -1,4 +1,4 @@
-import { getAllMoods } from "../controllers/moodController";
+import { getAllMoods } from "../Controllers/moodController";
 import { Router } from "express";
 
 const router = Router();

@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import Movie from "../models/Movie";
+import Movie from "../Models/Movie";
 import { mapGenresToMoodIds } from "../utils/genreToMoodMapper";
 import mongoose from "mongoose";
 
