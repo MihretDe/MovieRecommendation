@@ -47,7 +47,7 @@ const MovieSchema = new mongoose_1.Schema({
     voteAverage: Number,
     voteCount: Number,
     trailerKey: String,
-    genres: [{ type: Number }],
+    genres: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Genre" }],
     moods: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Mood" }], // ✅ New field
 });
 exports.default = mongoose_1.default.model("Movie", MovieSchema);

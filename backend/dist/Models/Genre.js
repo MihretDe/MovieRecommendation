@@ -33,9 +33,11 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Genre = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const GenreSchema = new mongoose_1.Schema({
     genreId: { type: Number, required: true },
     name: { type: String, required: true },
 });
-exports.default = mongoose_1.default.model("Genre", GenreSchema);
+exports.Genre = mongoose_1.default.models.Genre || mongoose_1.default.model("Genre", GenreSchema);
+exports.default = exports.Genre;
