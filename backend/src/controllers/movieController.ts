@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import Mood from "../Models/Mood";
 import Movie from "../Models/Movie";
 import { mapGenresToMoodIds } from "../utils/genreToMoodMapper";
-import Mood from "../Models/Mood";
+import Genre from "../Models/Genre"; 
 
 export const saveMovie = async (req: Request, res: Response) => {
   try {
@@ -53,34 +54,51 @@ export const saveMovie = async (req: Request, res: Response) => {
 };
 
 export const getMoviesByMood = async (req: Request, res: Response) => {
-  try {
-    const moodQuery = req.query.mood as string;
+try {
+Genre.modelName;
+const moodQuery = req.query.mood as string;
+const page = parseInt(req.query.page as string) || 1;
+const limit = 20;
+const skip = (page - 1) * limit;
+let filter: Record<string, unknown> = {};
 
-    if (moodQuery) {
-      const mood = await Mood.findOne({ name: moodQuery.toLowerCase() });
-      if (!mood) return res.status(404).json({ message: "Mood not found" });
+if (moodQuery) {
+  const mood = await Mood.findOne({ name: moodQuery.toLowerCase() });
+  if (!mood) return res.status(404).json({ message: "Mood not found" });
+  filter.moods = mood._id;
+}
 
-      const movies = await Movie.find({ moods: mood._id }).populate(
-        "genres moods"
-      );
-      return res.json(movies);
-    }
+const totalMovies = await Movie.countDocuments(filter);
+const totalPages = Math.ceil(totalMovies / limit);
 
-    const allMovies = await Movie.find().populate("genres moods");
-    res.json(allMovies);
-  } catch (err) {
-    res.status(500).json({ message: (err as Error).message });
-  }
+const movies = await Movie.find(filter)
+  .populate("genres moods")
+  .skip(skip)
+  .limit(limit);
+
+res.json({
+  page,
+  totalPages,
+  totalResults: totalMovies,
+  results: movies,
+});
+} catch (err) {
+res.status(500).json({ message: (err as Error).message });
+}
 };
 
 export const getMovieById = async (req: Request, res: Response) => {
   try {
-    const movieId = req.params.id;
-    const movie = await Movie.findOne({ movieId }).populate("genres moods");
-    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    const { id } = req.params;
+
+    const movie = await Movie.findById(id).populate("genres moods");
+
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
     res.json(movie);
   } catch (err) {
     res.status(500).json({ message: (err as Error).message });
   }
 };
-

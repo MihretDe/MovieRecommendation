@@ -10,4 +10,6 @@ const GenreSchema: Schema = new Schema({
   name: { type: String, required: true },
 });
 
-export default mongoose.model<IGenre>("Genre", GenreSchema);
+export const Genre = mongoose.models.Genre || mongoose.model<IGenre>("Genre", GenreSchema);
+
+export default Genre;
