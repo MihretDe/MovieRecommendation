@@ -34,20 +34,31 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const MovieSchema = new mongoose_1.Schema({
-    movieId: { type: Number, unique: true },
-    title: String,
-    originalTitle: String,
-    overview: String,
-    posterPath: String,
-    backdropPath: String,
-    releaseDate: String,
-    runtime: Number,
-    popularity: Number,
-    voteAverage: Number,
-    voteCount: Number,
-    trailerKey: String,
-    genres: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Genre" }],
-    moods: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Mood" }], // ✅ New field
+const favoriteSchema = new mongoose_1.Schema({
+    userId: {
+        type: String,
+        required: true,
+        index: true,
+    },
+    movieId: {
+        type: String,
+        required: true,
+        index: true,
+    },
+    movieTitle: {
+        type: String,
+        required: true,
+    },
+    moviePosterPath: {
+        type: String,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 });
-exports.default = mongoose_1.default.model("Movie", MovieSchema);
+// Compound index to ensure a user can't favorite the same movie twice
+favoriteSchema.index({ userId: 1, movieId: 1 }, { unique: true });
+const Favorite = mongoose_1.default.models.Favorite || mongoose_1.default.model("Favorite", favoriteSchema);
+exports.default = Favorite;
