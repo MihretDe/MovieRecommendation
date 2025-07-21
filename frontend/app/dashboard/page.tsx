@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import MovieHero from "../components/MovieHero";
 import MovieCard from "../components/MovieCard"; // you should have a MovieCard component
+import { Movie } from "../movies/page";
 
 const moodIcons: Record<string, JSX.Element> = {
   happy: <FaSmile className="text-yellow-400" />,
@@ -25,7 +26,7 @@ const moodIcons: Record<string, JSX.Element> = {
 const Dashboard = () => {
   const router = useRouter();
   const [moods, setMoods] = useState<string[]>([]);
-  const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [loadingMoods, setLoadingMoods] = useState(true);
   const [loadingMovies, setLoadingMovies] = useState(true);
 
@@ -80,7 +81,7 @@ const Dashboard = () => {
 
     fetchMoods();
     fetchTrendingMovies();
-  }, []);
+  }, [router]);
 
   return (
     <div className="min-h-screen text-white font-sans">

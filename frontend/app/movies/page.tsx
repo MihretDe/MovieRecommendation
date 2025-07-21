@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MovieCard from "../components/MovieCard";
 
-interface Movie {
+export interface Movie {
 _id: string;
 title: string;
 posterPath: string;
@@ -63,7 +63,7 @@ setLoading(false);
 
 
 if (mood) fetchMovies();
-}, [mood, currentPage]);
+}, [mood, currentPage,router]);
 
 const handlePrevious = () => {
 if (currentPage > 1) setCurrentPage((prev) => prev - 1);
@@ -87,7 +87,7 @@ return (
     ) : (
       <>
         <h1 className="text-3xl md:text-4xl font-bold mb-6 capitalize text-center">
-          Movies for "{mood}"
+          Movies for &quot;{mood}&quot;
         </h1>
         <div className="grid grid-cols-2 gap-6  md:grid-cols-4  justify-center  md:px-10 py-10">
           {movies.map((movie) => (

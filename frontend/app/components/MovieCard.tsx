@@ -1,6 +1,7 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 import FavoriteButton from "../components/favorite-button"; // Adjust the import path as necessary
+import Image from "next/image";
 
 interface Movie {
   _id: string;
@@ -19,7 +20,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
     >
        <div className="w-[160px] sm:w-[180px] md:w-[200px] lg:w-[220px] overflow-hidden rounded-lg shadow-md hover:shadow-xl transition duration-300 transform hover:scale-105 group">
       <div className="relative">
-        <img
+        <Image
           src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
           alt={movie.title}
           className="h-[260px] sm:h-[280px] md:h-[300px] lg:h-[330px] w-full object-cover rounded-lg"

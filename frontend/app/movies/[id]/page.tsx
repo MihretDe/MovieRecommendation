@@ -1,6 +1,14 @@
 import React from "react";
 import FavoriteButton from "../../components/favorite-button";
-
+import Image from "next/image";
+interface Genre{
+  name: string;
+  genreId: number;
+}
+interface Mood{
+  name: string;
+  genreIds: number[];
+}
 const getMovieById = async (id: string) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/movies/${id}`, {
     cache: "no-store",
@@ -17,7 +25,7 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
     <div className="min-h-screen bg-gray-800 text-white px-6 py-20">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
         <div className="relative">
-          <img
+          <Image
             src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
             alt={movie.title}
             className="rounded-lg shadow-lg w-full"
@@ -44,11 +52,11 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
             </p>
             <p>
               <strong>Genres:</strong>{" "}
-              {movie.genres.map((g: any) => g.name).join(", ")}
+              {movie.genres.map((g: Genre) => g.name).join(", ")}
             </p>
             <p>
               <strong>Moods:</strong>{" "}
-              {movie.moods.map((m: any) => m.name).join(", ")}
+              {movie.moods.map((m: Mood) => m.name).join(", ")}
             </p>
           </div>
         </div>
