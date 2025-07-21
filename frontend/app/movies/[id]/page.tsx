@@ -1,4 +1,5 @@
 import React from "react";
+import FavoriteButton from "../../components/favorite-button";
 
 const getMovieById = async (id: string) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/movies/${id}`, {
@@ -15,11 +16,19 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
   return (
     <div className="min-h-screen bg-black text-white px-6 py-12">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
-        <img
-          src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
-          alt={movie.title}
-          className="rounded-lg shadow-lg w-full"
-        />
+        <div className="relative">
+          <img
+            src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
+            alt={movie.title}
+            className="rounded-lg shadow-lg w-full"
+          />
+          {/* Favorite button on poster */}
+          <div className="absolute top-4 right-4">
+            <FavoriteButton               movieId={movie._id}
+              movieTitle={movie.title}
+              moviePosterPath={movie.posterPath} size="lg" />
+          </div>
+        </div>
 
         <div>
           <h1 className="text-3xl font-bold mb-2">{movie.title}</h1>
