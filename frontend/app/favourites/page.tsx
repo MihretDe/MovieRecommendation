@@ -126,7 +126,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white my-12">
       {/* Header */}
       <div className="bg-gray-800/50 border-b border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-8">
