@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "./AuthProvider";
+import dynamic from "next/dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,6 +22,8 @@ export const metadata = {
     "A web application that provides personalized movie recommendations based on user preferences and viewing history.",
 };
 
+const NavbarWrapper = dynamic(() => import("./navbar-wrapper"));
+
 export default function RootLayout({
   children,
 }: {
@@ -28,8 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NavbarWrapper></NavbarWrapper>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
 }
+        
