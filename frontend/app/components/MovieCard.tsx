@@ -14,7 +14,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
     const router = useRouter();
   return (
      <div
-      className="cursor-pointer w-[200px] md:w-[220px] hover:scale-105 transition transform"
+      className="cursor-pointer w-[150px] md:w-[220px] hover:scale-105 transition transform"
       onClick={() => router.push(`/movies/${movie._id}`)}
     >
        <div className="w-[160px] sm:w-[180px] md:w-[200px] lg:w-[220px] overflow-hidden rounded-lg shadow-md hover:shadow-xl transition duration-300 transform hover:scale-105 group">

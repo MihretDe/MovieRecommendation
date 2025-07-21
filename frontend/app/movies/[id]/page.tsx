@@ -14,7 +14,7 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
   const movie = await getMovieById(params.id);
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-12">
+    <div className="min-h-screen bg-gray-800 text-white px-6 py-20">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
         <div className="relative">
           <img
@@ -39,9 +39,6 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
           </p>
 
           <div className="text-sm text-gray-400">
-            <p>
-              <strong>Runtime:</strong> {movie.runtime} min
-            </p>
             <p>
               <strong>Votes:</strong> {movie.voteCount}
             </p>
