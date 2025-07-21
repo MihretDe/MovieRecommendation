@@ -27,6 +27,8 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
         <div className="relative">
           <Image
             src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
+            width={200}
+            height={300}
             alt={movie.title}
             className="rounded-lg shadow-lg w-full"
           />

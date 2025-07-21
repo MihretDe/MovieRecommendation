@@ -22,6 +22,8 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
       <div className="relative">
         <Image
           src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
+          width={200}
+          height={300}
           alt={movie.title}
           className="h-[260px] sm:h-[280px] md:h-[300px] lg:h-[330px] w-full object-cover rounded-lg"
         />
