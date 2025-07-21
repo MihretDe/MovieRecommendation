@@ -1,118 +1,150 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Heart, Trash2, Search, Grid, List, Star, Calendar } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import FavoriteButton from "../components/favorite-button"
-import type { ApiResponse, FavoriteResponse } from "../../types/api"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Heart,
+  Trash2,
+  Search,
+  Grid,
+  List,
+  Star,
+  Calendar,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import FavoriteButton from "../components/favorite-button";
+import type { ApiResponse, FavoriteResponse } from "../../types/api";
+import Image from "next/image";
 
 interface FavoriteMovie extends FavoriteResponse {
-  voteAverage?: number
-  releaseDate?: string
-  runtime?: number
-  genres?: string[]
+  voteAverage?: number;
+  releaseDate?: string;
+  runtime?: number;
+  genres?: string[];
 }
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
-  const [filteredFavorites, setFilteredFavorites] = useState<FavoriteMovie[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("newest")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const router = useRouter()
-
-  // Get token from localStorage
-  const getAuthToken = (): string | null => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("access_token")
-    }
-    return null
-  }
+  const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
+  const [filteredFavorites, setFilteredFavorites] = useState<FavoriteMovie[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const router = useRouter();
 
   // Fetch favorites from API
   const fetchFavorites = async () => {
-    const token = getAuthToken()
+    // Always access localStorage in the browser only
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
     if (!token) {
-      router.push("/signin")
-      return
+      router.push("/signin");
+      return;
     }
 
     try {
-      setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favourite`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
+      setLoading(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/favourite`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
-        const data: ApiResponse<FavoriteMovie[]> = await response.json()
-        setFavorites(data.data || [])
-        setFilteredFavorites(data.data || [])
+        const data: ApiResponse<FavoriteMovie[]> = await response.json();
+        setFavorites(data.data || []);
+        setFilteredFavorites(data.data || []);
       } else {
-        console.error("Failed to fetch favorites:", response.status)
+        console.error("Failed to fetch favorites:", response.status);
       }
     } catch (error) {
-      console.error("Error fetching favorites:", error)
+      console.error("Error fetching favorites:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Remove from favorites
   const removeFavorite = async (movieId: string) => {
-    const token = getAuthToken()
-    if (!token) return
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+    if (!token) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favourite/${movieId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/favourite/${movieId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
-        const updatedFavorites = favorites.filter((fav) => fav.movieId !== movieId)
-        setFavorites(updatedFavorites)
-        setFilteredFavorites(updatedFavorites)
+        const updatedFavorites = favorites.filter(
+          (fav) => fav.movieId !== movieId
+        );
+        setFavorites(updatedFavorites);
+        setFilteredFavorites(updatedFavorites);
       }
     } catch (error) {
-      console.error("Error removing favorite:", error)
+      console.error("Error removing favorite:", error);
     }
-  }
+  };
 
   // Filter and sort favorites
   useEffect(() => {
-    const filtered = favorites.filter((movie) => movie.movieTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+    const filtered = favorites.filter((movie) =>
+      movie.movieTitle.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     // Sort favorites
     switch (sortBy) {
       case "newest":
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        break
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
       case "oldest":
-        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        break
+        filtered.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        break;
       case "title":
-        filtered.sort((a, b) => a.movieTitle.localeCompare(b.movieTitle))
-        break
+        filtered.sort((a, b) => a.movieTitle.localeCompare(b.movieTitle));
+        break;
       case "rating":
-        filtered.sort((a, b) => (b.voteAverage || 0) - (a.voteAverage || 0))
-        break
+        filtered.sort((a, b) => (b.voteAverage || 0) - (a.voteAverage || 0));
+        break;
     }
 
-    setFilteredFavorites(filtered)
-  }, [favorites, searchQuery, sortBy])
+    setFilteredFavorites(filtered);
+  }, [favorites, searchQuery, sortBy]);
 
   useEffect(() => {
-    fetchFavorites()
-  }, [])
+    fetchFavorites();
+  }, []);
 
   if (loading) {
     return (
@@ -122,7 +154,7 @@ export default function FavoritesPage() {
           <p className="text-gray-400">Loading your favorites...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -137,7 +169,8 @@ export default function FavoritesPage() {
             <div>
               <h1 className="text-3xl font-bold">My Favorites</h1>
               <p className="text-gray-400">
-                {favorites.length} {favorites.length === 1 ? "movie" : "movies"} in your collection
+                {favorites.length} {favorites.length === 1 ? "movie" : "movies"}{" "}
+                in your collection
               </p>
             </div>
           </div>
@@ -209,15 +242,24 @@ export default function FavoritesPage() {
             {searchQuery ? (
               <div>
                 <Search className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-400 mb-2">No movies found</h3>
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                  No movies found
+                </h3>
                 <p className="text-gray-500">Try adjusting your search terms</p>
               </div>
             ) : (
               <div>
                 <Heart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-400 mb-2">No favorites yet</h3>
-                <p className="text-gray-500 mb-6">Start adding movies to your favorites to see them here</p>
-                <Button onClick={() => router.push("/dashboard")} className="bg-red-600 hover:bg-red-700 text-white">
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                  No favorites yet
+                </h3>
+                <p className="text-gray-500 mb-6">
+                  Start adding movies to your favorites to see them here
+                </p>
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
                   Discover Movies
                 </Button>
               </div>
@@ -228,13 +270,21 @@ export default function FavoritesPage() {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                 {filteredFavorites.map((movie) => (
-                  <MovieCardGrid key={movie.movieId} movie={movie} onRemove={removeFavorite} />
+                  <MovieCardGrid
+                    key={movie.movieId}
+                    movie={movie}
+                    onRemove={removeFavorite}
+                  />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredFavorites.map((movie) => (
-                  <MovieCardList key={movie.movieId} movie={movie} onRemove={removeFavorite} />
+                  <MovieCardList
+                    key={movie.movieId}
+                    movie={movie}
+                    onRemove={removeFavorite}
+                  />
                 ))}
               </div>
             )}
@@ -242,12 +292,18 @@ export default function FavoritesPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // Grid View Movie Card
-function MovieCardGrid({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (id: string) => void }) {
-  const router = useRouter()
+function MovieCardGrid({
+  movie,
+  onRemove,
+}: {
+  movie: FavoriteMovie;
+  onRemove: (id: string) => void;
+}) {
+  const router = useRouter();
 
   return (
     <div className="group relative">
@@ -256,20 +312,26 @@ function MovieCardGrid({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (i
         onClick={() => router.push(`/movies/${movie.movieId}`)}
       >
         <div className="relative aspect-[2/3]">
-          <img
+          <Image
             src={`https://image.tmdb.org/t/p/w500${movie.moviePosterPath}`}
             alt={movie.movieTitle}
+            width={300}
+            height={450}
             className="w-full h-full object-cover"
           />
 
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="absolute bottom-0 left-0 right-0 p-3">
-              <h3 className="text-sm font-semibold text-white truncate">{movie.movieTitle}</h3>
+              <h3 className="text-sm font-semibold text-white truncate">
+                {movie.movieTitle}
+              </h3>
               {movie.voteAverage && (
                 <div className="flex items-center gap-1 mt-1">
                   <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                  <span className="text-xs text-gray-300">{movie.voteAverage.toFixed(1)}</span>
+                  <span className="text-xs text-gray-300">
+                    {movie.voteAverage.toFixed(1)}
+                  </span>
                 </div>
               )}
             </div>
@@ -281,8 +343,8 @@ function MovieCardGrid({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (i
               size="sm"
               variant="destructive"
               onClick={(e) => {
-                e.stopPropagation()
-                onRemove(movie.movieId)
+                e.stopPropagation();
+                onRemove(movie.movieId);
               }}
               className="w-8 h-8 p-0 bg-red-600/80 hover:bg-red-700 backdrop-blur-sm"
             >
@@ -292,26 +354,36 @@ function MovieCardGrid({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (i
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // List View Movie Card
-function MovieCardList({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (id: string) => void }) {
-  const router = useRouter()
+function MovieCardList({
+  movie,
+  onRemove,
+}: {
+  movie: FavoriteMovie;
+  onRemove: (id: string) => void;
+}) {
+  const router = useRouter();
 
   return (
     <div
       className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800/70 transition-colors cursor-pointer group"
       onClick={() => router.push(`/movies/${movie.movieId}`)}
     >
-      <img
+      <Image
         src={`https://image.tmdb.org/t/p/w200${movie.moviePosterPath}`}
         alt={movie.movieTitle}
+        width={80}
+        height={120}
         className="w-16 h-24 object-cover rounded-md flex-shrink-0"
       />
 
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold text-white truncate">{movie.movieTitle}</h3>
+        <h3 className="text-lg font-semibold text-white truncate">
+          {movie.movieTitle}
+        </h3>
 
         <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
           {movie.voteAverage && (
@@ -340,8 +412,8 @@ function MovieCardList({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (i
           size="sm"
           variant="destructive"
           onClick={(e) => {
-            e.stopPropagation()
-            onRemove(movie.movieId)
+            e.stopPropagation();
+            onRemove(movie.movieId);
           }}
           className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30"
         >
@@ -349,5 +421,5 @@ function MovieCardList({ movie, onRemove }: { movie: FavoriteMovie; onRemove: (i
         </Button>
       </div>
     </div>
-  )
+  );
 }
