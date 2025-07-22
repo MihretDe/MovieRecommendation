@@ -1,11 +1,12 @@
 import React from "react";
 import FavoriteButton from "../../components/favorite-button";
 import Image from "next/image";
-interface Genre{
+import TrailerModal from "../../components/trailer-modal";
+interface Genre {
   name: string;
   genreId: number;
 }
-interface Mood{
+interface Mood {
   name: string;
   genreIds: number[];
 }
@@ -34,9 +35,12 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
           />
           {/* Favorite button on poster */}
           <div className="absolute top-4 right-4">
-            <FavoriteButton               movieId={movie._id}
+            <FavoriteButton
+              movieId={movie._id}
               movieTitle={movie.title}
-              moviePosterPath={movie.posterPath} size="lg" />
+              moviePosterPath={movie.posterPath}
+              size="lg"
+            />
           </div>
         </div>
 
@@ -60,6 +64,14 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
               <strong>Moods:</strong>{" "}
               {movie.moods.map((m: Mood) => m.name).join(", ")}
             </p>
+          </div>
+          <div className="my-4">
+            {movie.trailerKey && (
+              <TrailerModal
+                videoId={movie.trailerKey}
+                movieTitle={movie.title}
+              />
+            )}
           </div>
         </div>
       </div>
