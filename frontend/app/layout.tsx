@@ -4,6 +4,9 @@ import "./globals.css";
 import AuthProvider from "./AuthProvider";
 import dynamic from "next/dynamic";
 
+import { store } from "@/lib/store";
+import { Providers } from "@/lib/Providers";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,10 +35,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+         <Providers>
+          <AuthProvider>
           <NavbarWrapper></NavbarWrapper>
           {children}
         </AuthProvider>
+         </Providers>
+        
       </body>
     </html>
   );
