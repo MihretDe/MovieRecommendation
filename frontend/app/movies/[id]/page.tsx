@@ -1,36 +1,59 @@
-import React from "react";
-import FavoriteButton from "../../components/favorite-button";
+"use client";
+
+import React, { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import TrailerModal from "../../components/trailer-modal";
-interface Genre {
-  name: string;
-  genreId: number;
-}
-interface Mood {
-  name: string;
-  genreIds: number[];
-}
-const getMovieById = async (id: string) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/movies/${id}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) throw new Error("Movie not found");
-  return res.json();
-};
+import { useAppDispatch, useAppSelector } from "@/app/hooks/useRedux";
+import { fetchMovieById } from "@/lib/feauters/movie/movieSlice";
+import FavoriteButton from "@/app/components/favorite-button";
+import TrailerModal from "@/app/components/trailer-modal";
 
 
-function formatRuntime(runtime: number): string {
+const formatRuntime = (runtime: number): string => {
   if (!runtime || isNaN(runtime)) return "N/A";
   const hours = Math.floor(runtime / 60);
   const minutes = runtime % 60;
   if (hours === 0) return `${minutes}m`;
   if (minutes === 0) return `${hours}h`;
   return `${hours}h ${minutes}m`;
-}
+};
 
-const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
-  const movie = await getMovieById(params.id);
+const MovieDetailPage = () => {
+  const params = useParams();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const {
+    selectedMovie: movie,
+    loading,
+    error,
+  } = useAppSelector((state) => state.movies);
+
+  useEffect(() => {
+    const movieId = typeof params.id === "string" ? params.id : params.id?.[0];
+    if (movieId) {
+      dispatch(fetchMovieById(movieId));
+    }
+  }, [dispatch, params.id]);
+
+  if (loading || !movie) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading Movie...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center text-red-400">
+        Failed to load movie: {error}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-800 text-white px-6 py-20">
@@ -43,7 +66,6 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
             alt={movie.title}
             className="rounded-lg shadow-lg w-full"
           />
-          {/* Favorite button on poster */}
           <div className="absolute top-4 right-4">
             <FavoriteButton
               movieId={movie._id}
@@ -71,13 +93,14 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
             </p>
             <p>
               <strong>Genres:</strong>{" "}
-              {movie.genres.map((g: Genre) => g.name).join(", ")}
+              {movie.genres.map((g) => g.name).join(", ")}
             </p>
             <p>
               <strong>Moods:</strong>{" "}
-              {movie.moods.map((m: Mood) => m.name).join(", ")}
+              {movie.moods.map((m) => m.name).join(", ")}
             </p>
           </div>
+
           <div className="my-4">
             {movie.trailerKey && (
               <TrailerModal

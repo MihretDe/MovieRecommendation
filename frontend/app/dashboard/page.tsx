@@ -11,8 +11,9 @@ import {
   FaSpa,
 } from "react-icons/fa";
 import MovieHero from "../components/MovieHero";
-import MovieCard from "../components/MovieCard"; // you should have a MovieCard component
-import { Movie } from "../movies/page";
+import MovieCard from "../components/MovieCard"; 
+import { fetchTrendingMovies, MovieState } from "@/lib/feauters/movie/movieSlice";
+import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 
 const moodIcons: Record<string, JSX.Element> = {
   happy: <FaSmile className="text-yellow-400" />,
@@ -26,10 +27,12 @@ const moodIcons: Record<string, JSX.Element> = {
 const Dashboard = () => {
   const router = useRouter();
   const [moods, setMoods] = useState<string[]>([]);
-  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [loadingMoods, setLoadingMoods] = useState(true);
-  const [loadingMovies, setLoadingMovies] = useState(true);
-
+  const dispatch = useAppDispatch();
+  const { trending, loading, error } = useAppSelector(
+    (state: { movies: MovieState }) => state.movies
+  );
+  const fetched = useAppSelector((state) => state.movies.fetchedTrending);
    const getAuthToken = (): string | null => {
      if (typeof window !== "undefined") {
        return localStorage.getItem("access_token");
@@ -43,7 +46,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    
     const fetchMoods = async () => {
       const token = getAuthToken();
       if (!token) {
@@ -62,26 +64,11 @@ const Dashboard = () => {
         setLoadingMoods(false);
       }
     };
-
-    const fetchTrendingMovies = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/movies?page=1`
-        );
-        const data = await res.json();
-        if (data?.results) {
-          setTrendingMovies(data.results);
-        }
-      } catch (err) {
-        console.error("Failed to fetch trending movies:", err);
-      } finally {
-        setLoadingMovies(false);
-      }
-    };
-
+    if (!fetched) {
+      dispatch(fetchTrendingMovies());
+    }
     fetchMoods();
-    fetchTrendingMovies();
-  }, [router]);
+  }, [dispatch,fetched]);
 
   return (
     <div className="min-h-screen text-white font-sans">
@@ -95,14 +82,12 @@ const Dashboard = () => {
         </h2>
 
         {loadingMoods ? (
-
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading Moods ...</p>
-        </div>
-      </div>
-    
+          <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading Moods ...</p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center max-w-4xl mx-auto">
             {moods.map((mood) => (
@@ -129,17 +114,16 @@ const Dashboard = () => {
           Trending Movies
         </h2>
 
-        {loadingMovies ? (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading Trending Movies...</p>
-        </div>
-      </div>
-    
+        {loading ? (
+          <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading Trending Movies...</p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-            {trendingMovies.map((movie) => (
+            {trending.map((movie) => (
               <MovieCard key={movie._id} movie={movie} />
             ))}
           </div>
