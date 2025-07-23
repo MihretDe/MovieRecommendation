@@ -19,6 +19,16 @@ const getMovieById = async (id: string) => {
   return res.json();
 };
 
+
+function formatRuntime(runtime: number): string {
+  if (!runtime || isNaN(runtime)) return "N/A";
+  const hours = Math.floor(runtime / 60);
+  const minutes = runtime % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
 const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
   const movie = await getMovieById(params.id);
 
@@ -53,6 +63,9 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
           </p>
 
           <div className="text-sm text-gray-400">
+            <p>
+              <strong>Runtime:</strong> {formatRuntime(movie.runtime)}
+            </p>
             <p>
               <strong>Votes:</strong> {movie.voteCount}
             </p>
