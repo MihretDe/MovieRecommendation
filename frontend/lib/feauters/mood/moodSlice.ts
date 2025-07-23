@@ -12,10 +12,13 @@ export const fetchMoods = createAsyncThunk(
     try {
       const response = await axios.get(`${API_URL}/moods`);
       return response.data.moods;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch moods"
-      );
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message || "Failed to fetch moods"
+        );
+      }
+      return thunkAPI.rejectWithValue("Failed to fetch moods");
     }
   }
 );

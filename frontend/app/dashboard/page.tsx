@@ -60,7 +60,7 @@ const Dashboard = () => {
     }
 
     dispatch(fetchMoods());
-  }, [dispatch, fetchedTrending]);
+  }, [dispatch, fetchedTrending,router]);
 
   return (
     <div className="min-h-screen text-white font-sans">
