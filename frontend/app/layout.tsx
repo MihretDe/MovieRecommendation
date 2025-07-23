@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "./AuthProvider";
 import dynamic from "next/dynamic";
-
-import { store } from "@/lib/store";
 import { Providers } from "@/lib/Providers";
 
 const geistSans = Geist({

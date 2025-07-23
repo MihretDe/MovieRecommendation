@@ -20,7 +20,6 @@ const formatRuntime = (runtime: number): string => {
 
 const MovieDetailPage = () => {
   const params = useParams();
-  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const {
