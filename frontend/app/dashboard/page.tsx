@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   FaClock,
@@ -11,9 +11,11 @@ import {
   FaSpa,
 } from "react-icons/fa";
 import MovieHero from "../components/MovieHero";
-import MovieCard from "../components/MovieCard"; 
-import { fetchTrendingMovies, MovieState } from "@/lib/feauters/movie/movieSlice";
+import MovieCard from "../components/MovieCard";
+import { fetchTrendingMovies } from "@/lib/feauters/movie/movieSlice";
 import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
+import { fetchMoods } from "@/lib/feauters/mood/moodSlice";
+
 
 const moodIcons: Record<string, JSX.Element> = {
   happy: <FaSmile className="text-yellow-400" />,
@@ -26,49 +28,39 @@ const moodIcons: Record<string, JSX.Element> = {
 
 const Dashboard = () => {
   const router = useRouter();
-  const [moods, setMoods] = useState<string[]>([]);
-  const [loadingMoods, setLoadingMoods] = useState(true);
   const dispatch = useAppDispatch();
-  const { trending, loading, error } = useAppSelector(
-    (state: { movies: MovieState }) => state.movies
+
+  const { trending, loading, fetchedTrending } = useAppSelector(
+    (state) => state.movies
   );
-  const fetched = useAppSelector((state) => state.movies.fetchedTrending);
-   const getAuthToken = (): string | null => {
-     if (typeof window !== "undefined") {
-       return localStorage.getItem("access_token");
-     }
-     return null;
-   };
- 
+  const { moods, loading: loadingMoods } = useAppSelector(
+    (state) => state.moods
+  );
+
+  const getAuthToken = (): string | null => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("access_token");
+    }
+    return null;
+  };
 
   const handleMoodClick = (mood: string) => {
-    router.push(`/movies?mood=${mood.toLowerCase()}`);
+    router.push(`/movies?mood=${mood}`);
   };
 
   useEffect(() => {
-    const fetchMoods = async () => {
-      const token = getAuthToken();
-      if (!token) {
-        router.push("/signin");
-        return null;
-      }
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/moods`);
-        const data = await res.json();
-        if (data?.moods) {
-          setMoods(data.moods);
-        }
-      } catch (err) {
-        console.error("Failed to fetch moods:", err);
-      } finally {
-        setLoadingMoods(false);
-      }
-    };
-    if (!fetched) {
+    const token = getAuthToken();
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
+
+    if (!fetchedTrending) {
       dispatch(fetchTrendingMovies());
     }
-    fetchMoods();
-  }, [dispatch,fetched]);
+
+    dispatch(fetchMoods());
+  }, [dispatch, fetchedTrending]);
 
   return (
     <div className="min-h-screen text-white font-sans">
@@ -90,14 +82,14 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center max-w-4xl mx-auto">
-            {moods.map((mood) => (
+            {moods.map((mood,index) => (
               <button
-                key={mood}
+                key={index}
                 onClick={() => handleMoodClick(mood)}
                 className="flex flex-col items-center cursor-pointer justify-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-xl px-4 py-6 transition-transform transform hover:scale-105 border border-white/10 shadow-lg"
               >
                 <div className="text-3xl">
-                  {moodIcons[mood.toLowerCase()] || <FaSmile />}
+                  {moodIcons[mood] || <FaSmile />}
                 </div>
                 <span className="text-base md:text-lg font-medium capitalize">
                   {mood}

@@ -14,13 +14,13 @@ export interface Movie {
   moods: Mood[];
 }
 
-interface Genre {
+export interface Genre {
   _id: string;
   name: string;
   genreId: number;
 }
 
-interface Mood {
+export interface Mood {
   _id: string;
   name: string;
   genreIds: number[];
