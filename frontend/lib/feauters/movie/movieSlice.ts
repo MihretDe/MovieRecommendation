@@ -35,8 +35,11 @@ export const fetchTrendingMovies = createAsyncThunk(
     try {
       const res = await axios.get(`${API_URL}/movies?page=1`);
       return res.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(error.response?.data.message);
+      }
+      return thunkAPI.rejectWithValue("An unknown error occurred");
     }
   }
 );
@@ -49,8 +52,11 @@ export const fetchMoviesByMood = createAsyncThunk(
       const query = mood ? `?mood=${mood}&page=${page}` : `?page=${page}`;
       const res = await axios.get(`${API_URL}/movies${query}`);
       return res.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(error.response?.data.message);
+      }
+      return thunkAPI.rejectWithValue("An unknown error occurred");
     }
   }
 );
@@ -62,8 +68,11 @@ export const fetchMovieById = createAsyncThunk(
     try {
       const res = await axios.get(`${API_URL}/movies/${id}`);
       return res.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(error.response?.data.message);
+      }
+      return thunkAPI.rejectWithValue("An unknown error occurred");
     }
   }
 );
