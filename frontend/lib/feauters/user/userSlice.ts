@@ -40,6 +40,8 @@ export const loginUser = createAsyncThunk(
       const token = res.data.access_token;
       if (typeof window !== "undefined") {
         localStorage.setItem("access_token", token);
+        // Set cookie for SSR middleware
+        document.cookie = `access_token=${token}; path=/; max-age=604800; SameSite=Lax`;
       }
       return { token };
     } catch (error: any) {
@@ -154,8 +156,7 @@ const userSlice = createSlice({
       .addCase(signupUser.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
-      })
-     
+      });
   },
 });
 
