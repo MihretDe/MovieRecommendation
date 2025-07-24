@@ -7,6 +7,9 @@ import { Film, Mail, Lock, Eye, EyeOff, UserPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import API from "../../utils/api";
+import { useDispatch } from "react-redux";
+import { signupUser } from "@/lib/feauters/user/userSlice";
+import { AppDispatch } from "@/lib/store";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -19,6 +22,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const router = useRouter();
+  const dispatch: AppDispatch = useDispatch();
 
   // Password strength checker
   const checkPasswordStrength = (password: string) => {
@@ -66,19 +70,24 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const res = await API.post("/auth/signup", { email, password });
-      setMsg(res.data.message || "Account created successfully!");
-      setIsError(false);
+      // Use redux thunk for signup
+      const resultAction = await dispatch(signupUser({ email, password }));
+      if (signupUser.fulfilled.match(resultAction)) {
+        setMsg(
+          (resultAction.payload as { message?: string })?.message ||
+            "Account created successfully!"
+        );
+        setIsError(false);
 
-      setTimeout(() => {
-        router.push("/signin");
-      }, 1500);
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
-        "Signup failed";
-      setMsg(errorMessage);
+        setTimeout(() => {
+          router.push("/signin");
+        }, 1500);
+      } else {
+        setMsg((resultAction.payload as string) || "Signup failed");
+        setIsError(true);
+      }
+    } catch {
+      setMsg("Signup failed");
       setIsError(true);
     } finally {
       setIsLoading(false);

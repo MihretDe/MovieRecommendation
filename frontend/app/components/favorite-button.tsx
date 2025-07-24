@@ -5,6 +5,15 @@ import { useState, useEffect } from "react"
 import { Heart } from "lucide-react"
 import type { ApiResponse, CheckFavoriteResponse } from "../../types/api"
 
+// Redux imports
+import { useDispatch, useSelector } from "react-redux"
+import {
+  addFavourite,
+  removeFavourite,
+  fetchFavourites,
+} from "@/lib/feauters/favourites/favouritesSlice"
+import { RootState, AppDispatch } from "@/lib/store"
+
 interface FavoriteButtonProps {
   movieId: string
   movieTitle: string
@@ -12,100 +21,41 @@ interface FavoriteButtonProps {
   size?: "sm" | "md" | "lg"
 }
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ movieId, movieTitle, moviePosterPath, size = "md" }) => {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false)
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({
+  movieId,
+  movieTitle,
+  moviePosterPath,
+  size = "md",
+}) => {
+  const dispatch: AppDispatch = useDispatch()
+  const { favourites } = useSelector((state: RootState) => state.favourites)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  // Get token from localStorage
-  const getAuthToken = (): string | null => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("access_token")
-      
-    }
-    return null
-  }
+  // Check if movie is already favorited
+  const isFavorite = favourites.some((fav) => fav.movieId === movieId)
 
-  // Check if movie is already favorited when component mounts
   useEffect(() => {
-    const checkFavoriteStatus = async (): Promise<void> => {
-      const token = getAuthToken()
-      if (!token) return
-
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favourite/${movieId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (response.ok) {
-          const data: ApiResponse<CheckFavoriteResponse> = await response.json()
-          setIsFavorite(data.data?.isFavorite || false)
-        }
-      } catch (error) {
-        console.error("Error checking favorite status:", error)
-      }
+    // Optionally fetch favourites on mount if not already loaded
+    if (!favourites.length) {
+      dispatch(fetchFavourites())
     }
+  }, [dispatch, favourites.length])
 
-    if (movieId) {
-      checkFavoriteStatus()
-    }
-  }, [movieId])
-
-  const handleFavoriteClick = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const handleFavoriteClick = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
     e.stopPropagation()
-
-    const token = getAuthToken()
-    if (!token) {
-      console.error("No auth token found")
-      return
-    }
-
     setIsLoading(true)
-
     try {
       if (isFavorite) {
-        // Remove from favorites
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favourite/${movieId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        const data: ApiResponse = await response.json()
-        if (data.success) {
-          setIsFavorite(false)
-          console.log("Removed from favorites:", movieTitle)
-        } else {
-          throw new Error(data.error || "Failed to remove from favorites")
-        }
+        await dispatch(removeFavourite(movieId)).unwrap()
       } else {
-        // Add to favorites
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/favourite`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            movieId,
-            movieTitle,
-            moviePosterPath,
-          }),
-        })
-
-        const data: ApiResponse = await response.json()
-        if (data.success) {
-          setIsFavorite(true)
-          console.log("Added to favorites:", movieTitle)
-        } else {
-          throw new Error(data.error || "Failed to add to favorites")
-        }
+        await dispatch(
+          addFavourite({ movieId, movieTitle, moviePosterPath })
+        ).unwrap()
       }
     } catch (error) {
-      console.error("Error updating favorites:", error)
-      // You could add a toast notification here
+      // Optionally handle error (e.g., toast)
     } finally {
       setIsLoading(false)
     }
@@ -140,3 +90,4 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ movieId, movieTitle, mo
 }
 
 export default FavoriteButton
+            
