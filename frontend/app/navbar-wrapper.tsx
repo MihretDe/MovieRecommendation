@@ -4,24 +4,25 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Film, Home, LogOut, User, Heart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/lib/store";
+import { fetchUserProfile } from "@/lib/feauters/user/userSlice";
 
 function Navbar() {
   const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Fetch user from redux state
+  const { user, token } = useSelector((state: RootState) => state.user);
+  console.log("User:", user);
+  const dispatch: AppDispatch = useDispatch();
+
   useEffect(() => {
-    // Try to get email from localStorage (if stored in token)
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setEmail(payload.email || null);
-      } catch {
-        setEmail(null);
-      }
+    // Fetch user profile if not loaded but token exists
+    if (!user && token) {
+      dispatch(fetchUserProfile());
     }
-  }, []);
+  }, [dispatch, user, token]);
 
   const handleSignOut = () => {
     localStorage.removeItem("access_token");
@@ -78,7 +79,7 @@ function Navbar() {
             <User className="w-4 h-4 text-white" />
           </div>
           <span className="font-medium text-gray-200 text-sm max-w-[160px] truncate">
-            {email ?? "User"}
+            {user?.name ?? user?.email ?? "User"}
           </span>
         </div>
         <Button
@@ -168,21 +169,22 @@ function Navbar() {
                   Welcome back!
                 </span>
                 <span className="text-gray-400 text-xs truncate max-w-[200px]">
-                  {email ?? "User"}
+                  {user?.name ?? user?.email ?? "User"}
                 </span>
               </div>
             </div>
           </div>
 
           {/* Navigation Links */}
-
           {navigationItems.map((item) => {
             const Icon = item.icon;
             return (
-              <div className="flex-1 py-6 border-t border-gray-900">
+              <div
+                className="flex-1 py-6 border-t border-gray-900"
+                key={item.href} // <-- add key here
+              >
                 <div className="space-y-2 px-6">
                   <a
-                    key={item.href}
                     href={item.href}
                     onClick={closeMobileMenu}
                     className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors duration-200 font-medium"

@@ -63,13 +63,14 @@ export interface SignupResponse {
 
 export const signupUser = createAsyncThunk<
   SignupResponse,
-  { email: string; password: string },
+  { email: string; password: string; name: string },
   { rejectValue: string }
->("user/signup", async ({ email, password }, thunkAPI) => {
+>("user/signup", async ({ email, password, name }, thunkAPI) => {
   try {
     const res = await axios.post(`${API_URL}/auth/signup`, {
       email,
       password,
+      name,
     });
     return res.data as SignupResponse;
   } catch (error) {
@@ -84,29 +85,33 @@ export const signupUser = createAsyncThunk<
   }
 });
 
-// // Fetch user profile (example: /auth/me endpoint)
-// export const fetchUserProfile = createAsyncThunk(
-//   "user/fetchProfile",
-//   async (_, thunkAPI) => {
-//     try {
-//       const state: any = thunkAPI.getState();
-//       const token =
-//         state.user?.token ||
-//         (typeof window !== "undefined"
-//           ? localStorage.getItem("access_token")
-//           : null);
-//       const res = await axios.get(`${API_URL}/auth/me`, {
-//         headers: token ? { Authorization: `Bearer ${token}` } : {},
-//       });
-//       return res.data;
-//     } catch (error: unknown) {
-//       if (axios.isAxiosError(error)) {
-//         return thunkAPI.rejectWithValue(error.response?.data?.message);
-//       }
-//       return thunkAPI.rejectWithValue("An unknown error occurred");
-//     }
-//   }
-// );
+// Fetch user profile (example: /auth/me endpoint)
+export const fetchUserProfile = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: string }
+>(
+  "user/fetchProfile",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as { user: UserState };
+      const token =
+        state.user?.token ||
+        (typeof window !== "undefined"
+          ? localStorage.getItem("access_token")
+          : null);
+      const res = await axios.get(`${API_URL}/auth/me`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      return res.data as User;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || "Failed to fetch user");
+      }
+      return thunkAPI.rejectWithValue("An unknown error occurred");
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -155,6 +160,21 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(signupUser.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      // Fetch user profile
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.user = null;
         state.error = action.payload as string;
         state.loading = false;
       });

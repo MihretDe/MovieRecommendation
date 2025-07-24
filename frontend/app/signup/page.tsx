@@ -15,6 +15,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +72,7 @@ const Signup = () => {
 
     try {
       // Use redux thunk for signup
-      const resultAction = await dispatch(signupUser({ email, password }));
+      const resultAction = await dispatch(signupUser({ email, password , name }));
       if (signupUser.fulfilled.match(resultAction)) {
         setMsg(
           (resultAction.payload as { message?: string })?.message ||
@@ -114,6 +115,25 @@ const Signup = () => {
 
         {/* Signup Form */}
         <form onSubmit={handleSignup} className="space-y-6">
+           {/* Name Input */}
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium text-gray-300">
+              Name
+            </label>
+            <div className="relative">
+              <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="pl-11 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20 h-12"
+              />
+            </div>
+          </div>
+
           {/* Email Input */}
           <div className="space-y-2">
             <label
@@ -244,6 +264,8 @@ const Signup = () => {
               </div>
             )}
           </div>
+
+         
 
           {/* Signup Button */}
           <Button
