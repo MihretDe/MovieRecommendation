@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import MovieCard from "../components/MovieCard";
 import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 import { fetchMoviesByMood } from "@/lib/feauters/movie/movieSlice";
-
+import { useSearchParams } from "next/navigation";
 
 const MoviesPage = () => {
   const searchParams = useSearchParams();
