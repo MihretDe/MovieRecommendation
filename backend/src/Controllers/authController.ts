@@ -5,7 +5,7 @@ import connectDB from "../config/db";
 import { User } from "../Models/Users";
 
 export const signup = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body; // <-- add name
 
   try {
     const token = await getManagementToken();
@@ -16,6 +16,7 @@ export const signup = async (req: Request, res: Response) => {
       {
         email,
         password,
+        name, // <-- pass name to Auth0
         connection: "Username-Password-Authentication",
       },
       {
@@ -32,6 +33,7 @@ export const signup = async (req: Request, res: Response) => {
     const newUser = new User({
       email: auth0User.email,
       auth0Id: auth0User.user_id,
+      name: auth0User.name || name, // <-- store name in MongoDB
     });
 
     await newUser.save();
