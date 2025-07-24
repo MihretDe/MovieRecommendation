@@ -1,12 +1,15 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Film, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import API from "../../utils/api";
+// Redux imports
+import { useDispatch } from "react-redux";
+import { loginUser } from "@/lib/feauters/user/userSlice";
+import { AppDispatch } from "@/lib/store";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,31 +18,28 @@ const Login = () => {
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const res = await API.post("/auth/login", { email, password });
-      setMsg("Login successful!");
-      setIsError(false);
-      localStorage.setItem("access_token", res.data.access_token);
-
-      // Redirect after successful login
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 1000);
-    } catch (err) {
-      // err is unknown, but we can check if it's an axios error
-      const errorObj = err as {
-        response?: { data?: { error?: string; message?: string } };
-      };
-      const errorMessage =
-        errorObj.response?.data?.error ||
-        errorObj.response?.data?.message ||
-        "Login failed";
-      setMsg(errorMessage);
+      // Use redux thunk for login
+      const resultAction = await dispatch(loginUser({ email, password }));
+      if (loginUser.fulfilled.match(resultAction)) {
+        setMsg("Login successful!");
+        setIsError(false);
+        // Redirect after successful login
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1000);
+      } else {
+        setMsg((resultAction.payload as string) || "Login failed");
+        setIsError(true);
+      }
+    } catch {
+      setMsg("Login failed");
       setIsError(true);
     } finally {
       setIsLoading(false);
