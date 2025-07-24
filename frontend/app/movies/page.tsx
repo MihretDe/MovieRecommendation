@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { fetchMoviesByMood } from "@/lib/feauters/movie/movieSlice";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import MovieCard from "../components/MovieCard";
 import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
-import { fetchMoviesByMood } from "@/lib/feauters/movie/movieSlice";
-import { useSearchParams } from "next/navigation";
 
-const MoviesPage = () => {
+function MoviesPageContent() {
   const searchParams = useSearchParams();
   const mood = searchParams.get("mood") || "";
   const router = useRouter();
@@ -92,6 +91,12 @@ const MoviesPage = () => {
       )}
     </div>
   );
-};
+}
 
-export default MoviesPage;
+export default function MoviesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MoviesPageContent />
+    </Suspense>
+  );
+}
