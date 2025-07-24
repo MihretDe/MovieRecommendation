@@ -8,13 +8,14 @@ const axios_1 = __importDefault(require("axios"));
 const auth0_1 = require("../utils/auth0");
 const Users_1 = require("../Models/Users");
 const signup = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body; // <-- add name
     try {
         const token = await (0, auth0_1.getManagementToken)();
         console.log("Management Token:", token);
         const userResponse = await axios_1.default.post(`https://${process.env.AUTH0_DOMAIN}/api/v2/users`, {
             email,
             password,
+            name, // <-- pass name to Auth0
             connection: "Username-Password-Authentication",
         }, {
             headers: {
@@ -27,6 +28,7 @@ const signup = async (req, res) => {
         const newUser = new Users_1.User({
             email: auth0User.email,
             auth0Id: auth0User.user_id,
+            name: auth0User.name || name, // <-- store name in MongoDB
         });
         await newUser.save();
         res.status(201).json({ message: "User created and stored in MongoDB" });
