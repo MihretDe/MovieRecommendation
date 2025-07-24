@@ -30,10 +30,14 @@ const Login = () => {
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 1000);
-    } catch (err: any) {
+    } catch (err) {
+      // err is unknown, but we can check if it's an axios error
+      const errorObj = err as {
+        response?: { data?: { error?: string; message?: string } };
+      };
       const errorMessage =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
+        errorObj.response?.data?.error ||
+        errorObj.response?.data?.message ||
         "Login failed";
       setMsg(errorMessage);
       setIsError(true);
@@ -150,7 +154,7 @@ const Login = () => {
         {/* Sign Up Link */}
         <div className="mt-8 text-center">
           <p className="text-gray-400">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a
               href="/signup"
               className="text-red-400 hover:text-red-300 font-medium transition-colors"

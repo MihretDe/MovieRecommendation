@@ -73,10 +73,16 @@ const Signup = () => {
       setTimeout(() => {
         router.push("/signin");
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
+      // err is unknown, but we can check if it's an axios error
+      const errorObj = err as {
+        response?: {
+          data?: { message?: string; error?: { message?: string } };
+        };
+      };
       const errorMessage =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
+        errorObj.response?.data?.message ||
+        errorObj.response?.data?.error?.message ||
         "Signup failed";
       setMsg(errorMessage);
       setIsError(true);
