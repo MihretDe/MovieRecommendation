@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Heart,
@@ -21,8 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FavoriteButton from "../components/favorite-button";
-import type { ApiResponse, FavoriteResponse } from "../../types/api";
+import type { FavoriteResponse, ApiResponse } from "../../types/api";
 import Image from "next/image";
+
+// Redux imports
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchFavourites,
+  removeFavourite,
+} from "@/lib/feauters/favourites/favouritesSlice";
+import { RootState, AppDispatch } from "@/lib/store"; // adjust path if needed
 
 interface FavoriteMovie extends FavoriteResponse {
   voteAverage?: number;
@@ -32,92 +40,35 @@ interface FavoriteMovie extends FavoriteResponse {
 }
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
-  const [filteredFavorites, setFilteredFavorites] = useState<FavoriteMovie[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const router = useRouter();
 
-  // Fetch favorites from API
-  const fetchFavorites = async () => {
-    // Always access localStorage in the browser only
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
-    if (!token) {
-      router.push("/signin");
-      return;
-    }
+  const dispatch: AppDispatch = useDispatch(); // <-- type your dispatch
+  const { favourites, loading } = useSelector(
+    (state: RootState) => state.favourites
+  );
 
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/favourite`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data: ApiResponse<FavoriteMovie[]> = await response.json();
-        setFavorites(data.data || []);
-        setFilteredFavorites(data.data || []);
-      } else {
-        console.error("Failed to fetch favorites:", response.status);
-      }
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Remove from favorites
-  const removeFavorite = async (movieId: string) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
-    if (!token) return;
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/favourite/${movieId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const updatedFavorites = favorites.filter(
-          (fav) => fav.movieId !== movieId
-        );
-        setFavorites(updatedFavorites);
-        setFilteredFavorites(updatedFavorites);
-      }
-    } catch (error) {
-      console.error("Error removing favorite:", error);
-    }
-  };
+  // Fetch favorites from Redux store
+  useEffect(() => {
+    dispatch(fetchFavourites());
+  }, [dispatch]);
 
   // Filter and sort favorites
-  useEffect(() => {
-    const filtered = favorites.filter((movie) =>
-      movie.movieTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const filteredFavorites = (() => {
+    let filtered = favourites
+      .map((fav) => ({
+        ...fav,
+        voteAverage: (fav as FavoriteMovie).voteAverage ?? undefined,
+        releaseDate: (fav as FavoriteMovie).releaseDate ?? undefined,
+        runtime: (fav as FavoriteMovie).runtime ?? undefined,
+        genres: (fav as FavoriteMovie).genres ?? undefined,
+      }))
+      .filter((movie) =>
+        movie.movieTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
-    // Sort favorites
     switch (sortBy) {
       case "newest":
         filtered.sort(
@@ -138,13 +89,13 @@ export default function FavoritesPage() {
         filtered.sort((a, b) => (b.voteAverage || 0) - (a.voteAverage || 0));
         break;
     }
+    return filtered;
+  })();
 
-    setFilteredFavorites(filtered);
-  }, [favorites, searchQuery, sortBy]);
-
-  useEffect(() => {
-    fetchFavorites();
-  }, []);
+  // Remove from favorites using Redux
+  const handleRemoveFavorite = (movieId: string) => {
+    dispatch(removeFavourite(movieId));
+  };
 
   if (loading) {
     return (
@@ -169,8 +120,9 @@ export default function FavoritesPage() {
             <div>
               <h1 className="text-3xl font-bold">My Favorites</h1>
               <p className="text-gray-400">
-                {favorites.length} {favorites.length === 1 ? "movie" : "movies"}{" "}
-                in your collection
+                {favourites.length}{" "}
+                {favourites.length === 1 ? "movie" : "movies"} in your
+                collection
               </p>
             </div>
           </div>
@@ -269,21 +221,21 @@ export default function FavoritesPage() {
           <>
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                {filteredFavorites.map((movie) => (
+                {filteredFavorites.map((movie: FavoriteMovie) => (
                   <MovieCardGrid
                     key={movie.movieId}
                     movie={movie}
-                    onRemove={removeFavorite}
+                    onRemove={handleRemoveFavorite}
                   />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredFavorites.map((movie) => (
+                {filteredFavorites.map((movie: FavoriteMovie) => (
                   <MovieCardList
                     key={movie.movieId}
                     movie={movie}
-                    onRemove={removeFavorite}
+                    onRemove={handleRemoveFavorite}
                   />
                 ))}
               </div>
