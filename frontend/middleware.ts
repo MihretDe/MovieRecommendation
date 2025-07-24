@@ -7,7 +7,6 @@ export function middleware(request: NextRequest) {
 
   // Try to get token from cookies (server-side only)
   const cookieToken = request.cookies.get("access_token")?.value;
-  console.log(cookieToken , "cookieToken")
   // Try to get token from Authorization header (for API calls, not browser navigation)
   const headerToken = request.headers
     .get("authorization")
