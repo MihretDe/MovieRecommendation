@@ -2,6 +2,7 @@ import axios from "axios";
 import { Request, Response } from "express";
 import { getManagementToken } from "../utils/auth0";
 import connectDB from "../config/db";
+import jwt from "jsonwebtoken";
 import { User } from "../Models/Users";
 
 export const signup = async (req: Request, res: Response) => {
@@ -70,5 +71,45 @@ export const login = async (req: Request, res: Response) => {
     res
       .status(error.response?.status || 500)
       .json(error.response?.data || { message: "Login failed" });
+  }
+};
+
+export const fetchMe = async (req: Request, res: Response) => {
+  try {
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    const token = authHeader.split(" ")[1];
+
+    // Decode token to get Auth0 user id (sub)
+    let decoded: any;
+    try {
+      decoded = jwt.decode(token);
+    } catch {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const auth0Id = decoded.sub;
+    if (!auth0Id) {
+      return res.status(401).json({ message: "Invalid token payload" });
+    }
+
+    // Find user in MongoDB by auth0Id
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return user info (omit sensitive fields)
+    res.json({
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      auth0Id: user.auth0Id,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "Failed to fetch user" });
   }
 };
