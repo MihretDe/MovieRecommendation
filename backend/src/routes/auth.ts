@@ -5,5 +5,5 @@ const router = Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
-router.post("/me", fetchMe);
+router.get("/me", fetchMe);
 export default router;
